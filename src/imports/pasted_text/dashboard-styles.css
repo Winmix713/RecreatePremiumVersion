@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Core 2.0 — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<style>
+  :root{
+    --shade-01:#141414;--shade-02:#101010;--shade-03:#191919;--shade-04:#222222;--shade-05:#4C4C4C;
+    --shade-06:#727272;--shade-07:#7B7B7B;--shade-08:#E2E2E2;--shade-09:#F1F1F1;--shade-10:#FDFDFD;
+    --primary-01:#2A85FF;--primary-02:#00A656;--primary-03:#FF381C;
+    --secondary-01:#FFBC99;--secondary-04:#B5E4CA;
+
+    --b-surface1:var(--shade-02);--b-surface2:var(--shade-03);--b-pop:var(--shade-04);
+    --b-highlight:var(--shade-04);--b-depth2:#10101080;
+    --t-primary:var(--shade-09);--t-secondary:var(--shade-07);--t-tertiary:var(--shade-06);--t-light:var(--shade-01);
+    --s-stroke2:#282828;--s-subtle:#1E1E1E;--s-highlight:#72727280;
+    --chart-min:var(--shade-04);
+
+    --gradient-menu:#e2e2e206,#e2e2e20d;
+
+    --box-shadow-depth:0px 2.15px .5px -2px #00000040,0px 5px 1.5px -4px #08080833,0px 6px 4px -4px #08080829,0px 6px 13px 0px #0808081f,0px 24px 24px -16px #08080814,2px 4px 16px 0px #fdfdfd0d inset;
+    --box-shadow-depth-toggle:0px 0px 36px -8px #00000080,0px 2.15px .5px -2px #00000040,0px 24px 24px -16px #0808080a,0px 6px 13px 0px #08080808,0px 6px 4px -4px #0808080d,0px 5px 1.5px -4px #08080817;
+    --box-shadow-dropdown:0px 16px 48px -4px #000000bf,0px 0px 10px 0px #00000080,0px 2.15px .5px -2px #00000040,0px 24px 24px -16px #0808080a,0px 6px 13px 0px #08080808,0px 6px 4px -4px #0808080d,0px 5px 1.5px -4px #08080817;
+  }
+  html{-webkit-font-smoothing:antialiased;}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--b-surface1);color:var(--t-primary);letter-spacing:-0.01em;}
+  iconify-icon{display:inline-block;}
+
+  /* type scale, mapped from the Core 2.0 design tokens */
+  .text-h2{font-size:2.25rem;font-weight:500;line-height:1.15;letter-spacing:-0.02em;}
+  .text-h3{font-size:1.75rem;font-weight:500;line-height:1.15;letter-spacing:-0.02em;}
+  .text-h4{font-size:1.5rem;font-weight:500;line-height:1.2;letter-spacing:-0.01em;}
+  .text-h5{font-size:1.25rem;font-weight:500;line-height:1.2;letter-spacing:-0.01em;}
+  .text-h6{font-size:1rem;font-weight:600;line-height:1.2;letter-spacing:-0.01em;}
+  .text-sub-title-1{font-size:0.9375rem;font-weight:600;line-height:1.3;}
+  .text-sub-title-2{font-size:0.875rem;font-weight:600;line-height:1.3;}
+  .text-body-1{font-size:0.9375rem;font-weight:400;line-height:1.55;}
+  .text-body-2{font-size:0.875rem;font-weight:400;line-height:1.5;}
+  .text-button{font-size:0.875rem;font-weight:500;line-height:1.2;}
+  .text-caption{font-size:0.75rem;font-weight:400;line-height:1.3;}
+
+  .card{background:var(--b-surface2);border-radius:1.75rem;padding:0.75rem;}
+  .shadow-depth{box-shadow:var(--box-shadow-depth);}
+  .shadow-depth-toggle{box-shadow:var(--box-shadow-depth-toggle);}
+  .shadow-dropdown{box-shadow:var(--box-shadow-dropdown);}
+  .gradient-menu{background-image:linear-gradient(to bottom,rgba(226,226,226,.024),rgba(226,226,226,.05));}
+  .btn-light{background-image:linear-gradient(to bottom,var(--shade-10),#DEDEDE);}
+  .btn-surface{background-image:linear-gradient(to bottom,#2A2A2A,#202020);}
+  .label-green{background:rgba(0,166,86,.12);color:var(--primary-02);border-color:transparent;}
+  .label-red{background:rgba(255,56,28,.12);color:#FF6A55;border-color:transparent;}
+  .box-hover{position:absolute;inset:0;border-radius:1.5rem;background:transparent;transition:background 200ms;pointer-events:none;}
+  .group:hover .box-hover{background:var(--b-pop);}
+
+  .center-with-sidebar{max-width:100%;}
+  .scroll-x::-webkit-scrollbar{display:none;}
+  .scroll-x{scrollbar-width:none;}
+  .nav-y::-webkit-scrollbar{width:4px;}
+  .nav-y::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:4px;}
+
+  .acc-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows 280ms cubic-bezier(0.4,0,0.2,1);}
+  .acc-panel[data-open]{grid-template-rows:1fr;}
+  .acc-panel > div{overflow:hidden;}
+  .acc-arrow{transition:transform 280ms cubic-bezier(0.4,0,0.2,1);}
+  .acc-btn[data-open] .acc-arrow{transform:rotate(180deg);}
+  .acc-btn[data-open]{color:var(--t-primary);}
+  .acc-btn[data-open] svg{fill:var(--t-primary);}
+
+  .tree-item{position:relative;}
+  .tree-item::before{content:"";position:absolute;top:0;left:-0.8125rem;bottom:calc(50% - 0.75px);width:0.8125rem;border-left:1px solid var(--s-stroke2);border-bottom:1px solid var(--s-stroke2);border-bottom-left-radius:10px;}
+  .tree-wrap{position:relative;}
+  .tree-wrap::before{content:"";position:absolute;top:0;left:1.4375rem;bottom:3rem;width:1.5px;background:var(--s-stroke2);}
+
+  .select-btn[data-open]{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--s-subtle);border-bottom-color:transparent;color:var(--t-primary);}
+  .select-btn[data-open] .sel-arrow{transform:rotate(180deg);}
+  .select-opts{display:none;}
+  .select-opts[data-open]{display:block;}
+
+  .search-drop{display:none;}
+  .search-drop[data-open]{display:block;}
+
+  .avatar-menu{display:none;}
+  .avatar-menu[data-open]{display:block;}
+
+  .avatar-btn{background:transparent;}
+  .avatar-btn:hover{background:var(--primary-01);}
+
+  .fade-x{position:relative;}
+  .fade-x::before,.fade-x::after{content:"";position:absolute;top:0;bottom:0;width:2.5rem;pointer-events:none;z-index:3;opacity:0;transition:opacity 200ms;}
+  .fade-x::before{left:0;background:linear-gradient(to right,var(--b-surface2),transparent);}
+  .fade-x::after{right:0;background:linear-gradient(to left,var(--b-surface2),transparent);}
+  @media (max-width:767px){ .fade-x::before,.fade-x::after{opacity:1;} }
+
+  .btn-edge{position:relative;}
+  .btn-edge::after{content:"";position:absolute;inset:0;border-radius:inherit;border:1.5px solid rgba(255,255,255,.5);-webkit-mask-image:linear-gradient(to top,transparent,black 100%);mask-image:linear-gradient(to top,transparent,black 100%);pointer-events:none;}
+  .btn-edge:hover::after{opacity:0;}
+
+  a:focus-visible,button:focus-visible{outline:2px solid var(--primary-01);outline-offset:2px;border-radius:8px;}
+</style>
+</head>
+<body class="min-h-screen antialiased">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 bottom-0 z-40 flex flex-col w-[19rem] max-2xl:w-[17rem] p-5 max-md:p-3 transition-transform duration-300 -translate-x-full xl:translate-x-0" style="background:var(--b-surface1)">
+  <a href="#" class="flex items-center gap-2.5 h-12 mb-5 px-1">
+    <span class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-semibold tracking-tighter shrink-0" style="background:var(--shade-09);color:var(--shade-02)">C</span>
+    <span class="text-sm font-semibold tracking-tight">Core 2.0</span>
+  </a>
+  <button id="closeSidebar" aria-label="Close menu" class="xl:hidden absolute top-5 right-5 max-md:top-3 max-md:right-3 w-12 h-12 rounded-full btn-surface flex items-center justify-center" style="color:var(--t-secondary)">
+    <iconify-icon icon="solar:close-circle-linear" width="22"></iconify-icon>
+  </button>
+
+  <nav class="flex flex-col gap-1 grow overflow-auto nav-y -mx-5 px-5 max-md:-mx-3 max-md:px-3">
+    <a href="#" class="relative flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium" style="color:var(--t-primary)">
+      <div class="absolute inset-0 gradient-menu rounded-xl shadow-depth-toggle"></div>
+      <iconify-icon class="relative z-10" icon="solar:widget-4-linear" width="22"></iconify-icon>
+      <span class="relative z-10">Dashboard</span>
+    </a>
+
+    <button data-acc aria-expanded="false" class="acc-btn group flex items-center gap-3 h-12 px-3 text-sm font-medium transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+      <iconify-icon icon="solar:bag-linear" width="22"></iconify-icon> Products
+      <iconify-icon icon="solar:alt-arrow-down-linear" width="20" class="acc-arrow ml-auto"></iconify-icon>
+    </button>
+    <div class="acc-panel" data-panel>
+      <div>
+        <div class="tree-wrap pl-9 flex flex-col pt-1">
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Overview</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Drafts
+            <span class="ml-auto flex items-center justify-center w-6 h-6 rounded-lg text-xs font-medium" style="background:var(--secondary-01);color:var(--shade-01)">2</span></a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Released</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Comments</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Scheduled
+            <span class="ml-auto flex items-center justify-center w-6 h-6 rounded-lg text-xs font-medium" style="background:var(--secondary-04);color:var(--shade-01)">8</span></a></div>
+        </div>
+      </div>
+    </div>
+
+    <button data-acc aria-expanded="false" class="acc-btn group flex items-center gap-3 h-12 px-3 text-sm font-medium transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+      <iconify-icon icon="solar:users-group-rounded-linear" width="22"></iconify-icon> Customers
+      <iconify-icon icon="solar:alt-arrow-down-linear" width="20" class="acc-arrow ml-auto"></iconify-icon>
+    </button>
+    <div class="acc-panel" data-panel>
+      <div>
+        <div class="tree-wrap pl-9 flex flex-col pt-1">
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Overview</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Customer list</a></div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="flex items-center gap-3 h-12 px-3 text-sm font-medium transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+      <iconify-icon icon="solar:cart-large-2-linear" width="22"></iconify-icon> Shop
+    </a>
+
+    <button data-acc aria-expanded="false" class="acc-btn group flex items-center gap-3 h-12 px-3 text-sm font-medium transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+      <iconify-icon icon="solar:letter-linear" width="22"></iconify-icon> Income
+      <iconify-icon icon="solar:alt-arrow-down-linear" width="20" class="acc-arrow ml-auto"></iconify-icon>
+    </button>
+    <div class="acc-panel" data-panel>
+      <div>
+        <div class="tree-wrap pl-9 flex flex-col pt-1">
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Earning</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Refunds
+            <span class="ml-auto flex items-center justify-center w-6 h-6 rounded-lg text-xs font-medium" style="background:var(--secondary-01);color:var(--shade-01)">3</span></a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Payouts</a></div>
+          <div class="tree-item"><a href="#" class="flex items-center h-11 px-3 text-sm transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">Statements</a></div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="flex items-center gap-3 h-12 px-3 text-sm font-medium transition-colors duration-200 hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+      <iconify-icon icon="solar:medal-ribbons-star-linear" width="22"></iconify-icon> Promote
+    </a>
+  </nav>
+
+  <div class="mt-auto pt-6 max-md:pt-4">
+    <div class="group flex flex-col gap-1 w-12 p-1.5 rounded-full btn-surface cursor-pointer transition-shadow duration-300 hover:shadow-depth">
+      <button data-theme-btn data-active aria-label="Dark mode" aria-pressed="true" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200" style="background:#363636;color:var(--t-primary)">
+        <iconify-icon icon="solar:moon-linear" width="17"></iconify-icon>
+      </button>
+      <button data-theme-btn aria-label="Light mode" aria-pressed="false" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200" style="color:var(--t-secondary)">
+        <iconify-icon icon="solar:sun-2-linear" width="17"></iconify-icon>
+      </button>
+    </div>
+  </div>
+</aside>
+<div id="overlay" class="fixed inset-0 z-30 invisible opacity-0 transition-all duration-300 xl:hidden" style="background:rgba(0,0,0,.7)"></div>
+
+<!-- Content wrapper -->
+<div class="xl:pl-[19rem] max-2xl:xl:pl-[17rem]">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-20" style="background:var(--b-surface1)">
+    <div class="flex items-center gap-3 h-[5.5rem] max-md:h-[4.5rem] px-5 max-md:px-3">
+      <div class="flex xl:hidden items-center gap-3 mr-auto md:mr-3">
+        <a href="#" class="w-11 h-11 rounded-2xl flex items-center justify-center text-base font-semibold tracking-tighter" style="background:var(--shade-09);color:var(--shade-02)">C</a>
+        <button id="openSidebar" aria-label="Open menu" class="w-12 h-12 rounded-full btn-surface flex items-center justify-center" style="color:var(--t-secondary)">
+          <iconify-icon icon="solar:hamburger-menu-linear" width="22"></iconify-icon>
+        </button>
+      </div>
+      <div class="mr-auto text-h4 max-lg:text-h5 max-md:hidden">Dashboard</div>
+
+      <!-- Search -->
+      <div class="relative w-[19rem] max-[1179px]:w-[17rem] max-md:hidden" data-search>
+        <iconify-icon icon="solar:magnifer-linear" width="22" class="absolute top-3 left-3.5 pointer-events-none" style="color:var(--t-secondary)"></iconify-icon>
+        <input data-search-input type="text" aria-label="Search anything" placeholder="Search anything..." class="w-full h-12 pl-11 pr-3 rounded-3xl text-sm outline-none border border-transparent transition-colors duration-200 focus:border-[var(--s-stroke2)] placeholder:text-[var(--t-secondary)]" style="background:var(--b-surface2);color:var(--t-primary)">
+        <div data-search-drop class="search-drop absolute top-[calc(100%+0.625rem)] left-0 z-30 w-[26.625rem] max-[1179px]:w-[24.875rem] p-3 rounded-[2rem] border shadow-dropdown" style="background:var(--b-surface2);border-color:var(--s-subtle)">
+          <div class="mb-3">
+            <div class="p-3 text-sm" style="color:var(--t-secondary)">Best match</div>
+            <a href="#" class="group relative flex items-center p-3 rounded-2xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F2.png&amp;w=64&amp;q=75" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0" alt="">
+              <div class="relative z-10 grow max-w-[14.125rem] px-5 line-clamp-2 text-sub-title-1">Core Dashboard Builder 2.0</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 ml-auto text-right">
+                <span class="mb-1 text-sub-title-1">$2,453.80</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-green">Active</span>
+              </div>
+            </a>
+            <a href="#" class="group relative flex items-center p-3 rounded-2xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F4.png&amp;w=64&amp;q=75" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0" alt="">
+              <div class="relative z-10 grow max-w-[14.125rem] px-5 line-clamp-2 text-sub-title-1">SimpleSocial UI Design Kit</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 ml-auto text-right">
+                <span class="mb-1 text-sub-title-1">$1,345.24</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-red">Offline</span>
+              </div>
+            </a>
+          </div>
+          <div>
+            <div class="p-3 text-sm" style="color:var(--t-secondary)">Suggestions</div>
+            <div class="group relative flex items-center p-3 rounded-2xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F2.png&amp;w=64&amp;q=75" class="relative z-10 w-16 h-16 rounded-full object-cover shrink-0" alt="">
+              <div class="relative z-10 grow px-5"><div class="text-sub-title-1">Elbert</div><div class="mt-1 text-xs" style="color:var(--t-secondary)">UI/UX Designer</div></div>
+              <div class="relative z-10 shrink-0 flex items-center justify-center w-12 h-12 rounded-full border transition-colors duration-200 group-hover:border-[var(--s-highlight)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="solar:arrow-right-up-linear" width="20"></iconify-icon>
+              </div>
+            </div>
+            <div class="group relative flex items-center p-3 rounded-2xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F1.png&amp;w=64&amp;q=75" class="relative z-10 w-16 h-16 rounded-full object-cover shrink-0" alt="">
+              <div class="relative z-10 grow px-5"><div class="text-sub-title-1">Joyce</div><div class="mt-1 text-xs" style="color:var(--t-secondary)">UI/UX Designer</div></div>
+              <div class="relative z-10 shrink-0 flex items-center justify-center w-12 h-12 rounded-full border transition-colors duration-200 group-hover:border-[var(--s-highlight)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="solar:arrow-right-up-linear" width="20"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="#" class="btn-edge relative h-12 px-6 rounded-3xl btn-light text-sm font-semibold flex items-center transition-transform duration-300 hover:scale-[1.02] active:scale-95 max-md:hidden" style="color:var(--shade-01)">Create</a>
+      <button aria-label="Notifications" class="w-12 h-12 rounded-full btn-surface flex items-center justify-center transition-shadow duration-300 hover:shadow-depth" style="color:var(--t-secondary)">
+        <iconify-icon icon="solar:bell-linear" width="22"></iconify-icon>
+      </button>
+      <button aria-label="Messages" class="w-12 h-12 rounded-full btn-surface flex items-center justify-center transition-shadow duration-300 hover:shadow-depth" style="color:var(--t-secondary)">
+        <iconify-icon icon="solar:chat-round-line-linear" width="22"></iconify-icon>
+      </button>
+
+      <div class="relative" data-avatar>
+        <button data-avatar-btn aria-haspopup="menu" aria-expanded="false" aria-label="Account menu" class="avatar-btn relative w-12 h-12 rounded-full transition-colors duration-200">
+          <span class="absolute inset-[0.1875rem] rounded-full overflow-hidden">
+            <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F3.png&amp;w=96&amp;q=100" alt="avatar" class="w-full h-full object-cover">
+          </span>
+        </button>
+        <div data-avatar-menu class="avatar-menu absolute top-[calc(100%+0.625rem)] right-0 z-30 w-56 p-2 rounded-2xl border shadow-dropdown" style="background:var(--b-surface2);border-color:var(--s-subtle)">
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--t-primary)"><iconify-icon icon="solar:bag-4-linear" width="20"></iconify-icon>My shop</a>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--t-primary)"><iconify-icon icon="solar:pen-2-linear" width="20"></iconify-icon>Edit profile</a>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--t-primary)"><iconify-icon icon="solar:chart-square-linear" width="20"></iconify-icon>Analytics</a>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--t-primary)"><iconify-icon icon="solar:link-round-linear" width="20"></iconify-icon>Affiliate center</a>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--t-primary)"><iconify-icon icon="solar:compass-linear" width="20"></iconify-icon>Explore creators</a>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:var(--primary-01)"><iconify-icon icon="solar:star-linear" width="20"></iconify-icon>Upgrade to Pro</a>
+          <div class="my-1 h-px" style="background:var(--s-stroke2)"></div>
+          <a href="#" class="flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]" style="color:#FF6A55"><iconify-icon icon="solar:logout-3-linear" width="20"></iconify-icon>Log out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="px-5 max-md:px-3 pb-5">
+    <div class="flex gap-3 max-lg:block">
+
+      <!-- Left column -->
+      <div class="flex-1 min-w-0 flex flex-col gap-3">
+
+        <!-- Overview -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Overview</div>
+            <div class="relative min-w-40 max-md:min-w-[8.5rem]" data-select>
+              <button aria-haspopup="listbox" aria-expanded="false" class="select-btn group flex justify-between items-center w-full h-12 pl-4.5 pr-3 rounded-3xl border text-sm transition-colors duration-200 hover:border-[var(--s-highlight)]" style="border-color:var(--s-stroke2);color:var(--t-primary)">
+                <span data-value class="truncate pl-1">Last 7 days</span>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="20" class="sel-arrow ml-2 shrink-0 transition-transform duration-300" style="color:var(--t-secondary)"></iconify-icon>
+              </button>
+              <div data-options role="listbox" class="select-opts absolute top-[calc(100%-0.0625rem)] right-0 z-30 w-full p-2 rounded-b-2xl border border-t-0 shadow-dropdown" style="background:var(--b-surface2);border-color:var(--s-subtle)">
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 7 days</button>
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 28 days</button>
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 3 months</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3">
+            <div class="flex max-md:flex-col gap-1.5 mb-4 p-1.5 rounded-[2rem] border" style="border-color:var(--s-subtle);background:var(--b-depth2)">
+              <div data-stat data-stat-key="customers" data-active class="group flex-1 px-12 py-8 max-2xl:p-6 max-md:p-4 rounded-3xl cursor-pointer transition-all duration-300 shadow-depth-toggle" style="background:var(--b-surface2)">
+                <div class="flex items-center gap-3 mb-2 max-md:mb-3 text-sub-title-1 max-md:text-sub-title-2" style="color:var(--t-primary)">
+                  <iconify-icon icon="solar:users-group-rounded-linear" width="22"></iconify-icon> Customers
+                </div>
+                <div class="flex items-center gap-4 max-md:flex-col max-md:items-stretch max-md:gap-1">
+                  <div class="text-h2 max-md:text-h3">1,293</div>
+                  <div>
+                    <div class="inline-flex items-center gap-1 h-7 px-1.5 rounded-lg text-xs font-semibold label-red">
+                      <iconify-icon icon="solar:arrow-down-linear" width="15"></iconify-icon>36.8%
+                    </div>
+                    <div class="mt-1 text-xs" style="color:var(--t-secondary)">vs last month</div>
+                  </div>
+                </div>
+              </div>
+              <div data-stat data-stat-key="balance" class="group flex-1 px-12 py-8 max-2xl:p-6 max-md:p-4 rounded-3xl cursor-pointer transition-all duration-300">
+                <div class="flex items-center gap-3 mb-2 max-md:mb-3 text-sub-title-1 max-md:text-sub-title-2 transition-colors duration-200 group-hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">
+                  <iconify-icon icon="solar:cart-large-2-linear" width="22"></iconify-icon> Balance
+                </div>
+                <div class="flex items-center gap-4 max-md:flex-col max-md:items-stretch max-md:gap-1">
+                  <div class="text-h2 max-md:text-h3">256k</div>
+                  <div>
+                    <div class="inline-flex items-center gap-1 h-7 px-1.5 rounded-lg text-xs font-semibold label-green">
+                      <iconify-icon icon="solar:arrow-up-linear" width="15"></iconify-icon>36.8%
+                    </div>
+                    <div class="mt-1 text-xs" style="color:var(--t-secondary)">vs last month</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-5 max-lg:px-3 max-lg:py-4">
+              <div id="overview-customers-view">
+              <div class="mb-6">
+                <div class="text-h5 max-md:text-base">857 new customers today!</div>
+                <div class="text-body-2" style="color:var(--t-secondary)">Send a welcome message to all new customers.</div>
+              </div>
+              <div class="flex max-md:overflow-auto scroll-x max-md:-mx-3 max-md:px-3 fade-x">
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F1.png&amp;w=128&amp;q=75" alt="Gladyce" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Gladyce</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F2.png&amp;w=128&amp;q=75" alt="Elbert" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Elbert</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F3.png&amp;w=128&amp;q=75" alt="Joyce" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Joyce</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center max-[1349px]:hidden lg:block">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F4.png&amp;w=128&amp;q=75" alt="John" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">John</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center max-3xl:hidden 2xl:block">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F6.png&amp;w=128&amp;q=75" alt="Elbert" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Elbert</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center hidden 2xl:block">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F7.png&amp;w=128&amp;q=75" alt="Joyce" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Joyce</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-1 py-6 text-center hidden 2xl:block">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F8.png&amp;w=128&amp;q=75" alt="Anna" class="w-16 h-16 rounded-full object-cover mx-auto transition-transform duration-300 hover:scale-105">
+                  <div class="mt-4 text-button truncate" style="color:var(--t-secondary)">Anna</div>
+                </div>
+                <div class="flex-1 max-md:shrink-0 max-md:w-28 px-2 py-6 text-center">
+                  <a href="#" class="group inline-flex flex-col items-center">
+                    <span class="flex items-center justify-center w-16 h-16 rounded-full border transition-all duration-300 group-hover:border-[var(--s-highlight)] group-hover:shadow-depth" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                      <iconify-icon icon="solar:arrow-right-linear" width="22"></iconify-icon>
+                    </span>
+                    <span class="mt-4 text-button transition-colors duration-200 group-hover:text-[var(--t-primary)]" style="color:var(--t-secondary)">View all</span>
+                  </a>
+                </div>
+              </div>
+              </div>
+
+              <div id="overview-balance-view" class="hidden pt-2">
+                <div class="flex gap-3">
+                  <div class="flex flex-col justify-between text-xs shrink-0 py-1 max-md:hidden" style="color:var(--t-tertiary)">
+                    <span>100k</span><span>75k</span><span>50k</span><span>25k</span><span>$0</span>
+                  </div>
+                  <div class="relative grow">
+                    <svg viewBox="0 0 660 190" class="w-full h-48 max-md:h-36" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="earningFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#00A656" stop-opacity="0.28"/>
+                          <stop offset="100%" stop-color="#00A656" stop-opacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <g stroke="var(--s-stroke2)" stroke-width="1">
+                        <line x1="0" y1="190" x2="660" y2="190"></line>
+                        <line x1="0" y1="147.5" x2="660" y2="147.5" opacity="0.6"></line>
+                        <line x1="0" y1="105" x2="660" y2="105" opacity="0.6"></line>
+                        <line x1="0" y1="62.5" x2="660" y2="62.5" opacity="0.6"></line>
+                        <line x1="0" y1="20" x2="660" y2="20" opacity="0.6"></line>
+                      </g>
+                      <path d="M40,150 C99,150 99,80 158,80 C217,80 217,175 276,175 C335,175 335,150 394,150 C453,150 453,25 512,25 C571,25 571,115 630,115 L630,190 L40,190 Z" fill="url(#earningFill)"></path>
+                      <path d="M40,150 C99,150 99,80 158,80 C217,80 217,175 276,175 C335,175 335,150 394,150 C453,150 453,25 512,25 C571,25 571,115 630,115" fill="none" stroke="var(--primary-02)" stroke-width="2.5" stroke-linecap="round"></path>
+                      <circle cx="158" cy="80" r="9" fill="var(--primary-02)" fill-opacity="0.18"></circle>
+                      <circle cx="158" cy="80" r="4.5" fill="var(--primary-02)" stroke="var(--b-surface2)" stroke-width="2"></circle>
+                    </svg>
+                    <div class="absolute -translate-x-1/2 -translate-y-[135%] px-3 py-2 rounded-xl border whitespace-nowrap" style="left:23.9%;top:42%;background:var(--b-pop);border-color:var(--s-subtle);box-shadow:var(--box-shadow-dropdown)">
+                      <div class="text-xs" style="color:var(--t-tertiary)">Earning</div>
+                      <div class="text-sub-title-2" style="color:var(--t-primary)">$52,480.00</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-between text-xs mt-2 max-md:pl-0 pl-8" style="color:var(--t-tertiary)">
+                  <span>Apr</span><span>May</span><span>Jun</span><span>July</span><span>Aug</span><span>Sep</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Product view -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Product view</div>
+            <div class="relative min-w-40 max-md:min-w-[8.5rem]" data-select>
+              <button aria-haspopup="listbox" aria-expanded="false" class="select-btn group flex justify-between items-center w-full h-12 pl-4.5 pr-3 rounded-3xl border text-sm transition-colors duration-200 hover:border-[var(--s-highlight)]" style="border-color:var(--s-stroke2);color:var(--t-primary)">
+                <span data-value class="truncate pl-1">Last 7 days</span>
+                <iconify-icon icon="solar:alt-arrow-down-linear" width="20" class="sel-arrow ml-2 shrink-0 transition-transform duration-300" style="color:var(--t-secondary)"></iconify-icon>
+              </button>
+              <div data-options role="listbox" class="select-opts absolute top-[calc(100%-0.0625rem)] right-0 z-30 w-full p-2 rounded-b-2xl border border-t-0 shadow-dropdown" style="background:var(--b-surface2);border-color:var(--s-subtle)">
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 7 days</button>
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 28 days</button>
+                <button role="option" class="w-full h-10 px-3 rounded-xl text-left text-sm transition-colors duration-150 hover:bg-[var(--b-pop)]">Last 3 months</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 px-5 pb-5 max-md:pt-5 max-lg:px-3 max-lg:pb-4">
+            <div class="flex items-end max-md:block">
+              <div class="shrink-0 w-52 mr-16 max-2xl:mr-8 max-md:flex max-md:items-center max-md:gap-4 max-md:w-auto max-md:mb-5">
+                <div class="flex mb-4 max-md:mb-0">
+                  <div class="text-h3" style="color:var(--t-tertiary)">$</div>
+                  <div class="text-h2">10.2m</div>
+                </div>
+                <div class="flex items-center gap-2 max-md:flex-col max-md:items-start max-md:gap-1">
+                  <div class="inline-flex items-center gap-1 h-7 px-1.5 rounded-lg text-xs font-semibold label-green">
+                    <iconify-icon icon="solar:arrow-up-linear" width="15"></iconify-icon>36.8%
+                  </div>
+                  <div class="text-xs" style="color:var(--t-tertiary)">vs last month</div>
+                </div>
+              </div>
+              <div class="grow">
+                <div class="relative">
+                  <div id="bar-tooltip" class="pointer-events-none absolute -translate-x-1/2 -translate-y-[calc(100%+14px)] px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition-opacity duration-150" style="background:var(--b-pop);border-color:var(--s-subtle);color:var(--t-primary);box-shadow:var(--box-shadow-dropdown);opacity:0">2.2m</div>
+                  <div class="flex items-end gap-2 sm:gap-3 h-56 max-md:h-44">
+                    <button type="button" data-bar="14" data-value="1.1m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="grey" style="height:47.7%;background:rgba(123,123,123,.4)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">14</span>
+                    </button>
+                    <button type="button" data-bar="15" data-value="1.4m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="grey" style="height:60.5%;background:rgba(123,123,123,.4)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">15</span>
+                    </button>
+                    <button type="button" data-bar="16" data-value="0.8m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="min" style="height:33.7%;background:var(--chart-min)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">16</span>
+                    </button>
+                    <button type="button" data-bar="17" data-value="2.2m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="grey" style="height:91.9%;background:rgba(123,123,123,.4)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">17</span>
+                    </button>
+                    <button type="button" data-bar="18" data-value="1.8m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="grey" style="height:76.9%;background:rgba(123,123,123,.4)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">18</span>
+                    </button>
+                    <button type="button" data-bar="19" data-value="0.7m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="min" style="height:27.3%;background:var(--chart-min)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">19</span>
+                    </button>
+                    <button type="button" data-bar="20" data-value="2.0m" class="appearance-none bg-transparent border-0 p-0 flex-1 flex flex-col items-center gap-3 h-full justify-end group">
+                      <div class="bar-fill w-full rounded-xl transition-all duration-300" data-default="grey" style="height:83.5%;background:rgba(123,123,123,.4)"></div>
+                      <span class="text-xs" style="color:var(--t-tertiary)">20</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Carousel -->
+        <section class="card overflow-hidden">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Overview</div>
+            <div class="flex items-center gap-1">
+              <button data-slide="-1" aria-label="Previous" class="carousel-btn w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)] disabled:opacity-40 disabled:pointer-events-none" style="border-color:var(--s-stroke2);color:var(--t-secondary)" disabled>
+                <iconify-icon icon="solar:arrow-left-linear" width="22"></iconify-icon>
+              </button>
+              <button data-slide="1" aria-label="Next" class="carousel-btn w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)] disabled:opacity-40 disabled:pointer-events-none" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="solar:arrow-right-linear" width="22"></iconify-icon>
+              </button>
+            </div>
+          </div>
+          <div class="pt-6 px-2 pb-2 max-md:px-1 max-md:pt-5">
+            <div id="track" class="flex gap-4 overflow-x-auto scroll-x scroll-smooth pb-1">
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#DEB2FF,#D49EFC);color:#3a1f52">
+                  <iconify-icon icon="solar:calendar-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Early access</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F5.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">3 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-green">new</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#FFE4B1,#FFCF75);color:#4a3410">
+                  <iconify-icon icon="solar:gallery-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Access use guidelines</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F6.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">9 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-red">hot</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(rgba(208,242,223,.7),#B5E4CA);color:#123a29">
+                  <iconify-icon icon="solar:download-minimalistic-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Exclusive downloads</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F7.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">16 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-green">new</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#D2F4FF,#A1E0F5);color:#123a45">
+                  <iconify-icon icon="solar:check-square-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Life &amp; work updates</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F8.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">35 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-red">hot</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#DEB2FF,#D49EFC);color:#3a1f52">
+                  <iconify-icon icon="solar:rocket-2-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Product launch notes</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F1.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">6 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-green">new</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#FFE4B1,#FFCF75);color:#4a3410">
+                  <iconify-icon icon="solar:gallery-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Access use guidelines</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F6.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">9 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-red">hot</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(rgba(208,242,223,.7),#B5E4CA);color:#123a29">
+                  <iconify-icon icon="solar:download-minimalistic-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Exclusive downloads</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F7.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">16 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-green">new</span>
+                </div>
+              </a>
+              <a href="#" class="shrink-0 w-[13rem] h-[15rem] flex flex-col p-4.5 rounded-3xl border transition-all duration-300 hover:shadow-depth" style="border-color:var(--s-stroke2);background:var(--b-highlight)">
+                <span class="flex items-center justify-center w-16 h-16 mb-auto rounded-full" style="background:linear-gradient(#D2F4FF,#A1E0F5);color:#123a45">
+                  <iconify-icon icon="solar:check-square-linear" width="24"></iconify-icon>
+                </span>
+                <div class="mb-2 text-sub-title-1">Life &amp; work updates</div>
+                <div class="flex items-center gap-2">
+                  <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F8.png&amp;w=48&amp;q=75" alt="a" class="w-5 h-5 rounded-full object-cover">
+                  <span class="mr-auto text-xs" style="color:var(--t-tertiary)">35 mins read</span>
+                  <span class="inline-flex items-center h-5 px-1.5 rounded text-xs label-red">hot</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Get more customers -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Get more customers</div>
+          </div>
+          <div class="pt-4">
+            <div class="mb-6 px-2 text-body-2" style="color:var(--t-secondary)">
+              Fifty percent of new customers explore products because the author shares their work on social media. <br>Start earning now! 🔥
+            </div>
+            <div class="flex gap-3">
+              <a href="#" class="flex-1 h-12 rounded-3xl border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="simple-icons:x" width="19"></iconify-icon>
+              </a>
+              <a href="#" class="flex-1 h-12 rounded-3xl border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="simple-icons:facebook" width="20"></iconify-icon>
+              </a>
+              <a href="#" class="flex-1 h-12 rounded-3xl border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="simple-icons:instagram" width="20"></iconify-icon>
+              </a>
+              <a href="#" class="flex-1 h-12 rounded-3xl border flex items-center justify-center transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">
+                <iconify-icon icon="simple-icons:threads" width="20"></iconify-icon>
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right column -->
+      <div class="w-[25rem] max-2xl:w-[22rem] max-lg:w-full shrink-0 flex flex-col gap-3 max-lg:mt-3">
+
+        <!-- Popular products -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Popular products</div>
+          </div>
+          <div class="pt-3 flex flex-col gap-1">
+            <a href="#" class="group relative flex items-center p-3 rounded-3xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F1.png&amp;w=128&amp;q=75" alt="p1" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0">
+              <div class="relative z-10 grow px-4 text-sub-title-1 line-clamp-2">Crypter - NFT UI Kit</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 text-right">
+                <span class="mb-1 text-sub-title-1">$3,250.00</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-green">Active</span>
+              </div>
+            </a>
+            <a href="#" class="group relative flex items-center p-3 rounded-3xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F2.png&amp;w=128&amp;q=75" alt="p2" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0">
+              <div class="relative z-10 grow px-4 text-sub-title-1 line-clamp-2">Bento Pro 2.0 Illustrations</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 text-right">
+                <span class="mb-1 text-sub-title-1">$7,890.00</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-green">Active</span>
+              </div>
+            </a>
+            <a href="#" class="group relative flex items-center p-3 rounded-3xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F3.png&amp;w=128&amp;q=75" alt="p3" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0">
+              <div class="relative z-10 grow px-4 text-sub-title-1 line-clamp-2">Fleet - travel shopping kit</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 text-right">
+                <span class="mb-1 text-sub-title-1">$1,500.00</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-red">Offline</span>
+              </div>
+            </a>
+            <a href="#" class="group relative flex items-center p-3 rounded-3xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F4.png&amp;w=128&amp;q=75" alt="p4" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0">
+              <div class="relative z-10 grow px-4 text-sub-title-1 line-clamp-2">SimpleSocial UI Design Kit</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 text-right">
+                <span class="mb-1 text-sub-title-1">$9,999.00</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-green">Active</span>
+              </div>
+            </a>
+            <a href="#" class="group relative flex items-center p-3 rounded-3xl cursor-pointer">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Fproducts%2F5.png&amp;w=128&amp;q=75" alt="p5" class="relative z-10 w-16 h-16 rounded-xl object-cover shrink-0">
+              <div class="relative z-10 grow px-4 text-sub-title-1 line-clamp-2">Fleet - travel shopping kit</div>
+              <div class="relative z-10 flex flex-col items-end shrink-0 text-right">
+                <span class="mb-1 text-sub-title-1">$4,750.00</span>
+                <span class="inline-flex items-center h-6 px-1.5 rounded-lg border text-xs label-green">Active</span>
+              </div>
+            </a>
+          </div>
+          <div class="pt-6 pb-1 px-1">
+            <a href="#" class="w-full h-12 rounded-3xl border flex items-center justify-center text-button transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">All products</a>
+          </div>
+        </section>
+
+        <!-- Comments -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Comments</div>
+          </div>
+          <div class="pt-3 flex flex-col gap-1">
+            <div class="group relative flex items-start p-3 py-5 rounded-3xl">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F4.png&amp;w=96&amp;q=75" alt="Joyce" class="relative z-10 w-11 h-11 rounded-full object-cover shrink-0">
+              <div class="relative z-10 grow pl-4">
+                <div class="mb-1 text-sub-title-1">Joyce <span style="color:var(--t-secondary)">on</span> <a href="#" class="transition-colors duration-200 hover:text-[var(--shade-08)]">Bento Pro 2.0</a></div>
+                <div class="mb-3 text-xs" style="color:var(--t-tertiary)">09:00 AM</div>
+                <div class="text-body-1">Great work! When HTML version will be available? ⚡</div>
+              </div>
+            </div>
+            <div class="group relative flex items-start p-3 py-5 rounded-3xl">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F1.png&amp;w=96&amp;q=75" alt="Gladyce" class="relative z-10 w-11 h-11 rounded-full object-cover shrink-0">
+              <div class="relative z-10 grow pl-4">
+                <div class="mb-1 text-sub-title-1">Gladyce <span style="color:var(--t-secondary)">on</span> <a href="#" class="transition-colors duration-200 hover:text-[var(--shade-08)]">Food Delivery App</a></div>
+                <div class="mb-3 text-xs" style="color:var(--t-tertiary)">10:24 AM</div>
+                <div class="text-body-1">Amazing. This says compatible with After Effects. Will After Effects files be added?</div>
+              </div>
+            </div>
+            <div class="group relative flex items-start p-3 py-5 rounded-3xl">
+              <div class="box-hover"></div>
+              <img src="https://ui8-core-2.vercel.app/_next/image?url=%2Fimages%2Favatars%2F2.png&amp;w=96&amp;q=75" alt="Elbert" class="relative z-10 w-11 h-11 rounded-full object-cover shrink-0">
+              <div class="relative z-10 grow pl-4">
+                <div class="mb-1 text-sub-title-1">Elbert <span style="color:var(--t-secondary)">on</span> <a href="#" class="transition-colors duration-200 hover:text-[var(--shade-08)]">AstroClash</a></div>
+                <div class="mb-3 text-xs" style="color:var(--t-tertiary)">11:33 AM</div>
+                <div class="text-body-1">Hello, can we get the 3d source code of the characters?</div>
+              </div>
+            </div>
+          </div>
+          <div class="pt-6 pb-1 px-1">
+            <a href="#" class="w-full h-12 rounded-3xl border flex items-center justify-center text-button transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">All comments</a>
+          </div>
+        </section>
+
+        <!-- Refund requests -->
+        <section class="card">
+          <div class="flex items-center h-12 pl-2">
+            <div class="mr-auto text-h6">Refund requests</div>
+          </div>
+          <div class="pt-3 p-1">
+            <div class="flex items-center mb-8">
+              <span class="flex items-center justify-center w-16 h-16 shrink-0 rounded-full" style="background:linear-gradient(#FFD5BD,#FFC1B1);color:#4a2a1c">
+                <iconify-icon icon="solar:bag-3-linear" width="24"></iconify-icon>
+              </span>
+              <div class="grow pl-5 max-2xl:pl-4 text-body-2 font-medium leading-relaxed" style="color:var(--t-secondary)">
+                You have <a href="#" class="font-semibold transition-colors duration-200 hover:text-[var(--shade-08)]" style="color:var(--t-primary)">52 open refund requests</a> to action. This includes <a href="#" class="font-semibold transition-colors duration-200 hover:text-[var(--shade-08)]" style="color:var(--t-primary)">8 new requests.</a> 👀
+              </div>
+            </div>
+            <a href="#" class="w-full h-12 rounded-3xl border flex items-center justify-center text-button transition-all duration-200 hover:border-[var(--s-highlight)] hover:text-[var(--t-primary)]" style="border-color:var(--s-stroke2);color:var(--t-secondary)">View all</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Sidebar (mobile)
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  function openNav(){ sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('invisible','opacity-0'); }
+  function closeNav(){ sidebar.classList.add('-translate-x-full'); overlay.classList.add('invisible','opacity-0'); }
+  document.getElementById('openSidebar').addEventListener('click', openNav);
+  document.getElementById('closeSidebar').addEventListener('click', closeNav);
+  overlay.addEventListener('click', closeNav);
+
+  // Accordions (smooth grid-rows collapse)
+  document.querySelectorAll('[data-acc]').forEach(function(btn){
+    const panel = btn.nextElementSibling;
+    btn.addEventListener('click', function(){
+      const open = btn.hasAttribute('data-open');
+      if(open){ btn.removeAttribute('data-open'); panel.removeAttribute('data-open'); btn.setAttribute('aria-expanded','false'); }
+      else{ btn.setAttribute('data-open',''); panel.setAttribute('data-open',''); btn.setAttribute('aria-expanded','true'); }
+    });
+  });
+
+  // Custom selects
+  function closeAllSelects(){
+    document.querySelectorAll('[data-select]').forEach(function(sel){
+      sel.querySelector('[data-options]').removeAttribute('data-open');
+      const b = sel.querySelector('.select-btn');
+      b.removeAttribute('data-open');
+      b.setAttribute('aria-expanded','false');
+    });
+  }
+  document.querySelectorAll('[data-select]').forEach(function(sel){
+    const btn = sel.querySelector('.select-btn');
+    const list = sel.querySelector('[data-options]');
+    const value = sel.querySelector('[data-value]');
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const isOpen = btn.hasAttribute('data-open');
+      closeAllSelects();
+      if(!isOpen){ btn.setAttribute('data-open',''); list.setAttribute('data-open',''); btn.setAttribute('aria-expanded','true'); }
+    });
+    list.querySelectorAll('button').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        value.textContent = opt.textContent;
+        closeAllSelects();
+      });
+    });
+  });
+
+  // Search dropdown
+  const searchWrap = document.querySelector('[data-search]');
+  const searchInput = searchWrap.querySelector('[data-search-input]');
+  const searchDrop = searchWrap.querySelector('[data-search-drop]');
+  searchInput.addEventListener('focus', function(){ searchDrop.setAttribute('data-open',''); });
+
+  // Avatar menu
+  const avatarWrap = document.querySelector('[data-avatar]');
+  const avatarBtn = avatarWrap.querySelector('[data-avatar-btn]');
+  const avatarMenu = avatarWrap.querySelector('[data-avatar-menu]');
+  avatarBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const nowOpen = avatarMenu.toggleAttribute('data-open');
+    avatarBtn.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
+  });
+
+  document.addEventListener('click', function(e){
+    closeAllSelects();
+    if(!searchWrap.contains(e.target)) searchDrop.removeAttribute('data-open');
+    if(!avatarWrap.contains(e.target)){ avatarMenu.removeAttribute('data-open'); avatarBtn.setAttribute('aria-expanded','false'); }
+  });
+
+  // Stat toggle
+  const stats = document.querySelectorAll('[data-stat]');
+  const customersView = document.getElementById('overview-customers-view');
+  const balanceView = document.getElementById('overview-balance-view');
+  stats.forEach(function(tile){
+    tile.addEventListener('click', function(){
+      stats.forEach(function(t){
+        t.removeAttribute('data-active');
+        t.classList.remove('shadow-depth-toggle');
+        t.style.background = 'transparent';
+        t.querySelector('div').style.color = 'var(--t-secondary)';
+      });
+      tile.setAttribute('data-active','');
+      tile.classList.add('shadow-depth-toggle');
+      tile.style.background = 'var(--b-surface2)';
+      tile.querySelector('div').style.color = 'var(--t-primary)';
+
+      const isBalance = tile.dataset.statKey === 'balance';
+      customersView.classList.toggle('hidden', isBalance);
+      balanceView.classList.toggle('hidden', !isBalance);
+    });
+  });
+
+  // Carousel arrows + disabled state
+  const track = document.getElementById('track');
+  const prevBtn = document.querySelector('[data-slide="-1"]');
+  const nextBtn = document.querySelector('[data-slide="1"]');
+  function updateCarouselButtons(){
+    prevBtn.disabled = track.scrollLeft <= 4;
+    nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;
+  }
+  document.querySelectorAll('[data-slide]').forEach(function(b){
+    b.addEventListener('click', function(){
+      track.scrollBy({ left: parseInt(b.dataset.slide,10) * 240, behavior: 'smooth' });
+    });
+  });
+  track.addEventListener('scroll', updateCarouselButtons);
+  updateCarouselButtons();
+
+  // Theme pill (visual only — page stays dark)
+  const themeBtns = document.querySelectorAll('[data-theme-btn]');
+  themeBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      themeBtns.forEach(function(x){ x.style.background='transparent'; x.style.color='var(--t-secondary)'; x.setAttribute('aria-pressed','false'); });
+      b.style.background = '#363636';
+      b.style.color = 'var(--t-primary)';
+      b.setAttribute('aria-pressed','true');
+    });
+  });
+</script>
+</body>
+</html>

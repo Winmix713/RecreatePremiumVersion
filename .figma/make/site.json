@@ -1,0 +1,10 @@
+{
+  "description": "This web application offers users a premium experience with enhanced features and functionalities, tailored for those seeking high-quality digital solutions.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
